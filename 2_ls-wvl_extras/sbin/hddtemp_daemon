@@ -1,0 +1,132 @@
+#!/bin/sh
+# An alternative temperature monitoring and fan control script for 
+# WD MyBook World Edition external hard drives
+#
+# Copyright (C) 2007 by kyyhkynen at gmail.com
+#
+# You may do with this file (and parts thereof) whatever you want, as long
+# as my copyright notice is retained.
+# last updated 2008/04/23
+#
+#120411:   Adapted for vanilla kernel patched for LS-WVL/E-AP
+#(*edit*) also adapted for debian jessie with kernel 3.16 rogers0 build on ls-wvl
+#
+# Author: David Slama <dslam127@gmail.com>
+# Date: 7 November 2015
+
+########################################################
+#
+# Configuration settings
+#
+########################################################
+
+# Disk(s) to monitor.
+DISK1=sda
+DISK2=sdb
+
+# Program location. we'll use HDDTEMP to get the temperature if available, otherwise
+# smartctl will be used
+HDPARM=$(which hdparm)
+HDDTEMP=$(which hddtemp)
+SMARTCTL=$(which smartctl)
+
+# Control interface
+FAN_CTRL=/usr/local/sbin/fan_speed
+ALARM_CTRL=/usr/local/sbin/led_alarm
+
+# (default) temperature limits for speeds.
+# When the temperature of the disk(s) is below TEMP_LOW, the fan speed is set to 0
+# When the temperature of the disk(s) is above TEMP_LOW, the fan speed is set to 1500
+# When the temperature of the disk(s) is above TEMP_HIGH, the fan speed is set to 3250
+# When the temperature of the disk(s) goes beyond TEMP_FULL, the fan speed is set to 5000
+TEMP_LOW=36
+TEMP_HIGH=45
+TEMP_FULL=50
+
+# Temperature hysteresis for actually lower-down/stop the fan, i.e. the gap between
+# lowering down and speeding up the fan to avoid frequently change of the speed
+TEMP_HYS=3
+
+[ -s /etc/default/temp-monitor ] && . /etc/default/temp-monitor
+
+# Logging stuff
+LOG_ENABLED=false
+LOG_INTERVAL=1 #in half minute
+#LOGGER="echo Temp. monitor:"
+LOGGER="/usr/bin/logger -t temp-monitor"
+
+#######################################################################
+#
+# End of configuration. You shouldn't need to touch lines below this :)
+#
+#######################################################################
+
+# Device name(s) for the disk(s).
+DEV1=/dev/${DISK1}
+DEV2=/dev/${DISK2}
+
+# temperature threshold for lower-down/stop the fan
+TEMP_STOP=$((TEMP_LOW - TEMP_HYS))
+TEMP_DN_LOW=$((TEMP_HIGH - TEMP_HYS))
+TEMP_DN_HIGH=$((TEMP_FULL - TEMP_HYS))
+
+hdd_temp()
+{
+   temp=
+   hdtemp=-274
+   if [ -n "$HDDTEMP" ]; then
+      [ -b $DEV1 ] && hdtemp=$($HDDTEMP -n $DEV1)
+      [ -b $DEV2 ] && {
+         temp=$($HDDTEMP -n $DEV2)
+         [ $temp -gt $hdtemp ] && hdtemp=$temp
+      }
+   elif [ -n "$SMARTCTL" ]; then
+      [ -b $DEV1 ] && hdtemp=$($SMARTCTL -d ata -A $DEV1 | grep Tempera | cut -c 88-90)
+      [ -b $DEV2 ] && {
+         temp=$($SMARTCTL -d ata -A $DEV2 | grep Tempera | cut -c 88-90)
+         [ $temp -gt $hdtemp ] && hdtemp=$temp
+      }
+   fi
+   echo "$hdtemp"
+}
+
+HDD_TEMP=$(hdd_temp)
+if [ $HDD_TEMP -eq -274 -o ! -e "$FAN_CTRL"  ]; then
+   $LOG_ENABLED && ${LOGGER} "Required program (hddtemp or smartctl), harddisk or fan control interface not found, exit now."
+   exit 1
+fi
+
+# Get current fan speed
+log_counter=0
+
+while true; do
+
+   if [ $HDD_TEMP -ge $TEMP_FULL ]; then
+      $($FAN_CTRL high)
+      $($ALARM_CTRL on)
+   else
+      $($ALARM_CTRL off)
+      if [ $HDD_TEMP -gt $TEMP_DN_HIGH ]; then 
+         $($FAN_CTRL mid)
+      elif [ $HDD_TEMP -ge $TEMP_HIGH ]; then
+         $($FAN_CTRL mid)
+      elif [ $HDD_TEMP -gt $TEMP_DN_LOW ]; then
+         $($FAN_CTRL low)
+      elif [ $HDD_TEMP -ge $TEMP_LOW ]; then
+         $($FAN_CTRL low)
+      elif [ $HDD_TEMP -gt $TEMP_STOP ]; then
+         $($FAN_CTRL off)
+      else
+         $($FAN_CTRL off)
+      fi
+   fi
+
+   log_counter=$(( log_counter + 1 ))
+   if [ $log_counter -ge $((LOG_INTERVAL * 2)) ]; then
+      $LOG_ENABLED && ${LOGGER} "${HDD_TEMP} ${fspeed}"
+      log_counter=0
+   fi
+
+   sleep 30
+   HDD_TEMP=$(hdd_temp)
+done

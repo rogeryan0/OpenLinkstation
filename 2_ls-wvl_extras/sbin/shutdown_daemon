@@ -1,0 +1,16 @@
+#!/bin/bash
+
+# Determines whether or not to shut down LS-WVL
+# based on the switch values
+
+SW_POWER=/sys/class/gpio/gpio46/value
+SW_PAUTO=/sys/class/gpio/gpio47/value
+INTERVAL=5
+
+# when switched on they cannot both be equal
+while [ $(cat $SW_POWER) -ne $(cat $SW_PAUTO) ]; do
+    sleep $INTERVAL
+done
+
+# when switched off
+shutdown -h now

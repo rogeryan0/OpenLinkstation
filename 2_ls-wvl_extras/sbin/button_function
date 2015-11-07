@@ -1,0 +1,10 @@
+#!/bin/bash
+
+# shell script to output function button state
+BUTTON=/sys/class/gpio/gpio45/value
+
+if [ $(cat $BUTTON) -eq 0 ]; then
+    echo "on"
+else
+    echo "off"
+fi

@@ -1,19 +1,19 @@
 #!/bin/bash
 
 # shell script to control the blue function led
+PIN=/sys/class/gpio/gpio39/value
 
 case $1 in
     on)
-        echo 1 > /sys/class/gpio/gpio39/value
+        echo 1 > $PIN
     ;;
     off)
-        echo 0 > /sys/class/gpio/gpio39/value
+        echo 0 > $PIN
     ;;
     state)
-        VAL="$(cat /sys/class/gpio/gpio39/value)"
-        if [ "$VAL" == "0" ]; then
+        if [ $(cat $PIN) -eq 0 ]; then
             echo "off"
-        elif [ "$VAL" == "1" ]; then
+        else
             echo "on"
         fi
     ;;

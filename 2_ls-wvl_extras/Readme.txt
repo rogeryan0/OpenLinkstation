@@ -1,8 +1,17 @@
 This is a work in progress. I am currently attending college and working a full-time job so please don't expect immediate results.
-I can only test these steps on the LS-WVL (Buffalo Linkstation Pro Duo). If anybody wants to try it on another device go right ahead
-but know that by doing so you will be doing it at your own risk.
+I can only test these steps on the LS-WVL (Buffalo Linkstation Pro Duo). If anybody wants to try it on another device be my guest.
+Know that if anything happens it is not my responsibility. Proceed at your own risk. Feedback is appreciated.
 
-Steps
-1. run gpio_install.sh
-        - this will install a small hack that fixes the gpio interface disappearing after each reboot (it's messy but works!)
-2. install the scripts in the scripts folder in /usr/local/sbin and make them executable with chmod (will be working on install script soon)		
+The only thing that needs to be done is "chmod +x" the install.sh and then run it.
+This will install
+- a gpio interface
+an interface for the rest of these things to work
+- hdd temperature monitoring
+adjusts fan speed automatically
+- hdd activity monitoring
+info led light will blink when hdd is working
+- shutdown monitoring 
+the switch in the back will shutdown the device again
+- more scripts for gpio controls in /usr/local/sbin/
+
+Note: cat the files for the credits and sources
