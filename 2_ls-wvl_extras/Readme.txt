@@ -5,3 +5,4 @@ but know that by doing so you will be doing it at your own risk.
 Steps
 1. run gpio_install.sh
         - this will install a small hack that fixes the gpio interface disappearing after each reboot (it's messy but works!)
+2. install the scripts in the scripts folder in /usr/local/sbin (will be working on install script soon)		
