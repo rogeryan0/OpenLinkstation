@@ -61,7 +61,7 @@ chmod +x /usr/local/sbin/shutdown_daemon
 echo "updating boot preferences"
 update-rc.d gpio_interface defaults
 update-rc.d hddled_activity defaults
-update-rc.d hddtemp_monitor
+update-rc.d hddtemp_monitor defaults
 update-rc.d shutdown_monitor defaults
 
 sleep 5
