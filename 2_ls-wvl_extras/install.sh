@@ -64,5 +64,6 @@ update-rc.d hddled_activity defaults
 update-rc.d hddtemp_monitor defaults
 update-rc.d shutdown_monitor defaults
 
+echo "rebooting in 5 seconds"
 sleep 5
 reboot
