@@ -48,8 +48,8 @@ Instructions for installing debian with Debian Jessie and linux kernel 3.16 on t
     wait for reboot then login via ssh as root with "password" if not previously changed 
     cd to the directory where rogers0 OpenLinkstation files are.
     mount the root directory:
-        -- [ mount /dev/md1 /mnt ] (for dual drive)
-        -- [ mount /dev/sda1 /mnt ] (for single drive)
+        -- [ mount /dev/md1 /mnt ] (for dual drive [/dev/md0 is boot]) 
+        -- [ mount /dev/sda2 /mnt ] (for single drive [/dev/sda1 is boot])
     [ 1_debootstrap/build_rootfs_with_buffalo-kernel.sh debian ] (don't forget the debian at the end)
     (this will install debian to the inital install directory)
     reboot if it does not do it automatically
