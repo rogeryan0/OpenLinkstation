@@ -17,7 +17,7 @@
 # Note: only tested on ls-wvl (linkstation pro duo)
 
 echo "getting dependencies"
-apt-get install -y sysstat
+apt-get install -y sysstat busybox
 
 echo "copying files"
 cp init.d/gpio_interface /etc/init.d/
