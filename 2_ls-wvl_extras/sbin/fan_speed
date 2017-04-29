@@ -1,0 +1,48 @@
+#!/bin/bash
+
+# shell script to control the fan speed
+
+# ++ = stop 0rpm
+# +- = low 1500rpm
+# -+ = med 3250rpm
+# -- = high 5000rpm
+
+PIN1=/sys/class/gpio/gpio16/value
+PIN2=/sys/class/gpio/gpio17/value
+
+case $1 in
+    off)
+        echo 1 > $PIN1
+        echo 1 > $PIN2
+    ;;
+    low)
+        echo 1 > $PIN1
+        echo 0 > $PIN2
+    ;;
+    mid)
+        echo 0 > $PIN1
+        echo 1 > $PIN2
+    ;;
+    high)
+        echo 0 > $PIN1
+        echo 0 > $PIN2
+    ;;
+    state)
+		P1=$(cat $PIN1)
+		P2=$(cat $PIN2)
+        if [ $P1 -eq $P2 ] && [ $P1 -eq 1 ]; then
+            echo "off"
+		elif [ $P1 -eq $P2 ] && [ $P1 -eq 0 ]; then
+            echo "high"
+        elif [ $P1 -gt $P2 ]; then
+            echo "mid"
+        elif [ $P1 -lt $P2 ]; then
+            echo "low"
+        else
+            echo "state of the fan undetermined"
+        fi
+    ;;
+    *)
+        echo "arguments: off, low, mid, high, or state"
+    ;;
+esac

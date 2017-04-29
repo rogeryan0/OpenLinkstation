@@ -1,0 +1,23 @@
+#!/bin/bash
+
+# shell script to control the internal red led by hdd0
+PIN=/sys/class/gpio/gpio35/value
+
+case $1 in
+    on)
+        echo 1 > $PIN
+    ;;
+    off)
+        echo 0 > $PIN
+    ;;
+    state)
+        if [ $(cat $PIN) -eq 0 ]; then
+            echo "off"
+        else
+            echo "on"
+        fi
+    ;;
+    *)
+        echo "arguments: on, off, or state"
+    ;;
+esac

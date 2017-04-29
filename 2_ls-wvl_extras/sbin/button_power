@@ -1,0 +1,10 @@
+#!/bin/bash
+
+# simple shell script to output auto power button position
+BUTTON=/sys/clas/gpio/gpio46/value
+
+if [ $(cat $BUTTON) -eq 0 ]; then
+    echo "on"
+else
+    echo "off"
+fi

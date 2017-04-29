@@ -1,0 +1,53 @@
+#!/bin/sh
+
+### BEGIN INIT INFO
+# Provides:          hdd_led_activity
+# Required-Start:    $syslog
+# Required-Stop:     $syslog
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Monitor Linkstation LS-CHL
+# Description:       Enable service provided by daemon.
+### END INIT INFO
+
+#
+# hddled:
+# - monitors hdd activity and displays it using info/error led
+#
+# Author: David Slama <dslam127@gmail.com>
+# Date: 7 November 2015
+#
+# Credits:
+# This is not all my work, but I can't find the original source.
+
+LED_INFO=/sys/class/gpio/gpio38/value
+
+run_daemon()
+{       # this part is not my code only modified
+        iostat -z -d 1 sda | sed -u -e '1d' -e 's/Device.*/0/' -e 's/sd.*/1/' -e '/^$/d' > $LED_INFO &
+}
+
+kill_daemon()
+{
+        pkill iostat
+}
+
+# Main loop
+case $1 in
+        start)
+                echo "starting hdd led daemon."
+                run_daemon
+                ;;
+        stop)
+                echo "stopping hdd led daemon."
+                kill_daemon
+                ;;
+        restart|force-reload)
+                $0 stop && sleep 2 && $0 start
+                ;;
+
+        *)
+                echo "Usage: $0 {start|stop|restart|force-reload}"
+                exit 2
+                ;;
+esac
